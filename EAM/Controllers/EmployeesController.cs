@@ -23,9 +23,18 @@ namespace EAM.Controllers
         }
 
         // GET: EmployeesController/Details/5
-        public ActionResult Details(int id)
+        public async Task<IActionResult> Details(long id)
         {
-            return View();
+            var employee = await refer.Employees
+                .Include(e => e.Attendance) // Include the attendance record
+                .FirstOrDefaultAsync(e => e.ID == id);
+
+            if (employee == null)
+            {
+                return NotFound();
+            }
+
+            return View("Details",employee);
         }
 
         // GET: EmployeesController/Create
@@ -55,28 +64,56 @@ namespace EAM.Controllers
 
 
         // GET: EmployeesController/Edit/5
-        public ActionResult Edit(int id)
+        public async Task<IActionResult> Edit(long id)
         {
-            return View();
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var employee = await refer.Employees
+                .Include(e => e.Attendance)
+                .FirstOrDefaultAsync(e => e.ID == id);
+
+            if (employee == null)
+            {
+                return NotFound();
+            }
+
+            return View("Edit",employee);
         }
 
-        // POST: EmployeesController/Edit/5
+        // POST: Employees/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public async Task<IActionResult> Edit(long id, [Bind("ID,Name,Email,Department")] Employee employee,[Bind("Date,CheckInTime,CheckOutTime")] Attendance attendance)
         {
-            try
+            if (id == null)
+        {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
             {
+                refer.Update(employee);
+                await refer.SaveChangesAsync();
+
+                attendance.EmployeeID = employee.ID;
+                refer.Update(attendance);
+                await refer.SaveChangesAsync();
+
                 return RedirectToAction(nameof(Index));
             }
-            catch
-            {
-                return View();
-            }
-        }
 
-        // GET: EmployeesController/Delete/5
-        public ActionResult Delete(int id)
+            return View( "Edit",employee);
+        }
+    }
+
+
+
+
+    // GET: EmployeesController/Delete/5
+    /*public ActionResult Delete(int id)
         {
             return View();
         }
@@ -94,6 +131,6 @@ namespace EAM.Controllers
             {
                 return View();
             }
-        }
-    }
+        }*/
+    
 }

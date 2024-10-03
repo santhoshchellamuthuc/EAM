@@ -1,5 +1,4 @@
 ﻿@model DataAccessLayer.Employee
-
 <form asp-action="Create">
     <div class="form-group">
         <label asp-for="Name"></label>
@@ -16,6 +15,23 @@
         <input asp-for="Department" class="form-control" />
         <span asp-validation-for="Department" class="text-danger"></span>
     </div>
+    <div class="form-group">
+        <label for="Attendance.Date">Date</label>
+        <input asp-for="Attendance.Date" type="date" class="form-control" />
+        <span asp-validation-for="Attendance.Date" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label for="Attendance.CheckInTime">Check-In Time</label>
+        <input asp-for="Attendance.CheckInTime" type="time" class="form-control" />
+        <span asp-validation-for="Attendance.CheckInTime" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="Attendance.CheckOutTime">Check-Out Time</label>
+        <input asp-for="Attendance.CheckOutTime" type="time" class="form-control" />
+        <span asp-validation-for="Attendance.CheckOutTime" class="text-danger"></span>
+    </div>
+
     <!-- Attendance fields can be added similarly -->
 
     <button type="submit" class="btn btn-primary">Create</button>
