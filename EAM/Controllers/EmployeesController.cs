@@ -64,7 +64,7 @@ namespace EAM.Controllers
 
 
         // GET: EmployeesController/Edit/5
-        public async Task<IActionResult> Edit(long id)
+        public async Task<IActionResult> Edit(long? id)
         {
             if (id == null)
             {
@@ -80,16 +80,16 @@ namespace EAM.Controllers
                 return NotFound();
             }
 
-            return View("Edit",employee);
+            return View("Edit", employee);
         }
 
         // POST: Employees/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(long id, [Bind("ID,Name,Email,Department")] Employee employee,[Bind("Date,CheckInTime,CheckOutTime")] Attendance attendance)
+        public async Task<IActionResult> Edit(long? id, [Bind("ID,Name,Email,Department")] Employee employee,[Bind("Date,CheckInTime,CheckOutTime")] Attendance attendance)
         {
             if (id == null)
-        {
+            {
                 return NotFound();
             }
 
@@ -104,33 +104,59 @@ namespace EAM.Controllers
 
                 return RedirectToAction(nameof(Index));
             }
+            else
+            {
+                return View("Error");
+            }
 
-            return View( "Edit",employee);
+           
+        }
+        public async Task<IActionResult> Delete(long? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var employee = await refer.Employees
+                .Include(e => e.Attendance)
+                .FirstOrDefaultAsync(e => e.ID == id);
+
+            if (employee == null)
+            {
+                return NotFound();
+            }
+
+            return View("Delete", employee);
+        }
+
+        // POST: Employees/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var employee = await refer.Employees
+                .Include(e => e.Attendance)
+                .FirstOrDefaultAsync(e => e.ID== id);
+
+            if (employee == null)
+            {
+                return NotFound();
+            }
+
+            // Delete attendance data
+            if (employee.Attendance != null)
+            {
+                refer.Attendances.Remove(employee.Attendance);
+            }
+
+            // Delete employee data
+            refer.Employees.Remove(employee);
+            await refer.SaveChangesAsync();
+            await refer.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
     }
-
-
-
-
-    // GET: EmployeesController/Delete/5
-    /*public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: EmployeesController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }*/
-    
 }
+    
+

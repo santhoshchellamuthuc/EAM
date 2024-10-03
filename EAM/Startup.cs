@@ -28,7 +28,7 @@ namespace EAM
             services.AddControllersWithViews();
             var Defaultconnection = Configuration.GetConnectionString("DbConnection");
             services.AddDbContext<EAMDbcontext>(options => options.UseSqlServer(Defaultconnection));
-            services.AddTransient<IEamRepository, EamRepository>();
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
