@@ -2,6 +2,7 @@ using DataAccessLayer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -25,8 +26,9 @@ namespace EAM
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
-
-            services.AddDbContext<EAMDbcontext>(options => options.UseMysql());
+            var Defaultconnection = Configuration.GetConnectionString("DbConnection");
+            services.AddDbContext<EAMDbcontext>(options => options.UseSqlServer(Defaultconnection));
+            services.AddTransient<IEamRepository, EamRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
