@@ -5,6 +5,8 @@
 <form asp-action="Edit">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     <input type="hidden" asp-for="ID" />
+    <input type="hidden" asp-for="Attendance.AttendanceID" />
+    <input type="hidden" asp-for="Attendance.EmployeeID" />
 
     <div class="form-group">
         <label asp-for="Name" class="control-label"></label>

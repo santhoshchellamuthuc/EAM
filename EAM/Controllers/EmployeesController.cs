@@ -19,7 +19,15 @@ namespace EAM.Controllers
         // GET: EmployeesController
         public async Task<IActionResult> Index()
         {
-            return View("List",await refer.Employees.Include(e => e.Attendance).ToListAsync());
+            try
+            {
+                return View("List", await refer.Employees.Include(e => e.Attendance).ToListAsync());
+
+            }
+            catch (Exception )
+            {
+                return View("Error");
+            }
         }
 
         // GET: EmployeesController/Details/5
@@ -48,86 +56,113 @@ namespace EAM.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ID,Name,Email,Department")] Employee employee, [Bind("Date,CheckInTime,CheckOutTime")] Attendance attendance)
         {
-            if (ModelState.IsValid)
+            try
             {
-                refer.Add(employee);
-                await refer.SaveChangesAsync();
+                if (ModelState.IsValid)
+                {
+                    refer.Add(employee);
+                    await refer.SaveChangesAsync();
 
-                attendance.EmployeeID = employee.ID; // Link attendance to the newly created employee
-                refer.Add(attendance);
-                await refer.SaveChangesAsync();
+                    attendance.EmployeeID = employee.ID; // Link attendance to the newly created employee
+                    refer.Add(attendance);
+                    await refer.SaveChangesAsync();
 
-                return RedirectToAction(nameof(Index));
+                    return RedirectToAction(nameof(Index));
+                }
+                return View("Create", employee);
             }
-            return View("Create",employee);
+            catch (Exception ex)
+            {
+                return View("Error",ex.Message);
+            }
+           
         }
 
 
         // GET: EmployeesController/Edit/5
         public async Task<IActionResult> Edit(long? id)
         {
-            if (id == null)
+            try
             {
-                return NotFound();
+                if (id == null)
+                {
+                    return NotFound();
+                }
+
+                var employee = await refer.Employees
+                    .Include(e => e.Attendance)
+                    .FirstOrDefaultAsync(e => e.ID == id);
+
+                if (employee == null)
+                {
+                    return NotFound();
+                }
+
+                return View("Edit", employee);
+
             }
-
-            var employee = await refer.Employees
-                .Include(e => e.Attendance)
-                .FirstOrDefaultAsync(e => e.ID == id);
-
-            if (employee == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                return View("Error",ex.Message);
             }
-
-            return View("Edit", employee);
         }
 
         // POST: Employees/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(long? id, [Bind("ID,Name,Email,Department")] Employee employee,[Bind("Date,CheckInTime,CheckOutTime")] Attendance attendance)
+        public async Task<IActionResult> Edit(long? id, [Bind("ID,Name,Email,Department,Attendance")] Employee employee)
         {
-            if (id == null)
+
+            try
             {
-                return NotFound();
-            }
+                if (id == null)
+                {
+                    return NotFound();
+                }
 
-            if (ModelState.IsValid)
+                if (ModelState.IsValid)
+                {
+                   
+                        refer.Update(employee);
+                        await refer.SaveChangesAsync();
+                        return RedirectToAction(nameof(Index));
+                    
+                }
+                else
+                {
+                    return View("Edit", employee);
+                }
+
+            }catch(Exception ex)
             {
-                refer.Update(employee);
-                await refer.SaveChangesAsync();
-
-                attendance.EmployeeID = employee.ID;
-                refer.Update(attendance);
-                await refer.SaveChangesAsync();
-
-                return RedirectToAction(nameof(Index));
+                return View("error",ex.Message);
             }
-            else
-            {
-                return View("Error");
-            }
-
            
         }
         public async Task<IActionResult> Delete(long? id)
         {
-            if (id == null)
+            try
             {
-                return NotFound();
+                if (id == null)
+                {
+                    return NotFound();
+                }
+
+                var employee = await refer.Employees
+                    .Include(e => e.Attendance)
+                    .FirstOrDefaultAsync(e => e.ID == id);
+
+                if (employee == null)
+                {
+                    return NotFound();
+                }
+
+                return View("Delete", employee);
             }
-
-            var employee = await refer.Employees
-                .Include(e => e.Attendance)
-                .FirstOrDefaultAsync(e => e.ID == id);
-
-            if (employee == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                return View("Error",ex.Message);
             }
-
-            return View("Delete", employee);
         }
 
         // POST: Employees/Delete/5
@@ -135,26 +170,32 @@ namespace EAM.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var employee = await refer.Employees
-                .Include(e => e.Attendance)
-                .FirstOrDefaultAsync(e => e.ID== id);
-
-            if (employee == null)
+            try
             {
-                return NotFound();
-            }
+                var employee = await refer.Employees
+              .Include(e => e.Attendance)
+              .FirstOrDefaultAsync(e => e.ID == id);
 
-            // Delete attendance data
-            if (employee.Attendance != null)
+                if (employee == null)
+                {
+                    return NotFound();
+                }
+
+                // Delete attendance data
+                if (employee.Attendance != null)
+                {
+                    refer.Attendances.Remove(employee.Attendance);
+                }
+
+                // Delete employee data
+                refer.Employees.Remove(employee);
+                await refer.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
             {
-                refer.Attendances.Remove(employee.Attendance);
+                return View("Error",ex.Message);
             }
-
-            // Delete employee data
-            refer.Employees.Remove(employee);
-            await refer.SaveChangesAsync();
-            await refer.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
         }
     }
 }

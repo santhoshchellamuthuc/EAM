@@ -9,8 +9,11 @@ namespace DataAccessLayer
     {
         [Key]
         public long ID { get; set; }
+        [Required]
         public string Name { get; set; }
+        [Required]
         public string Email { get; set; }
+        [Required]
         public string Department { get; set; }
         
         // Navigation property
